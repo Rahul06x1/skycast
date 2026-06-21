@@ -34,7 +34,7 @@ jobs:
           service_account: ${{ vars.DEPLOYER_SA }}
           token_format: access_token
 
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@v3
 
       - name: Build & push dbt image
         run: |
