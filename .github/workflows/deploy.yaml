@@ -8,6 +8,7 @@ on:
       - "dbt/**"
       - "infra/**"
       - "Dockerfile"
+  workflow_dispatch:
 
 # Keyless auth via Workload Identity Federation — no service-account keys.
 permissions:
