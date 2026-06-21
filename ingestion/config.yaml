@@ -1,0 +1,25 @@
+# SkyCast ingestion configuration.
+# project_id is overridden at runtime by the GCP_PROJECT env var (set by Terraform).
+project_id: your-gcp-project
+forecast_days: 1
+
+bigquery:
+  dataset: inbound
+  table: raw_forecasts
+
+cities:
+  - name: London
+    latitude: 51.5072
+    longitude: -0.1276
+  - name: New York
+    latitude: 40.7128
+    longitude: -74.0060
+  - name: Tokyo
+    latitude: 35.6762
+    longitude: 139.6503
+  - name: Sydney
+    latitude: -33.8688
+    longitude: 151.2093
+  - name: Nairobi
+    latitude: -1.2921
+    longitude: 36.8219

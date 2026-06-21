@@ -1,0 +1,1 @@
+"""SkyCast weather ingestion package."""

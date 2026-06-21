@@ -1,0 +1,33 @@
+[project]
+name = "skycast-ingestion"
+version = "0.1.0"
+description = "SkyCast weather ingestion Cloud Function"
+requires-python = ">=3.12"
+dependencies = [
+    "functions-framework>=3.8.0",
+    "google-cloud-bigquery>=3.27.0",
+    "requests>=2.32.0",
+    "pyyaml>=6.0.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-mock>=3.14.0",
+    "ruff>=0.7.0",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+markers = ["integration: tests that need real GCP credentials"]
+
+[tool.setuptools.packages.find]
+include = ["skycast*"]
