@@ -50,7 +50,7 @@ jobs:
           gcloud storage cp "${OBJECT}" "gs://${SOURCE_BUCKET}/${OBJECT}"
           echo "FUNCTION_OBJECT=${OBJECT}" >> "$GITHUB_ENV"
 
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.9.5
 
