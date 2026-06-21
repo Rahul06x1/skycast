@@ -1,0 +1,76 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ingestion/**"
+      - "dbt/**"
+      - "infra/**"
+      - "Dockerfile"
+
+# Keyless auth via Workload Identity Federation — no service-account keys.
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  REGION: europe-west2
+  AR_REPO: skycast
+  SOURCE_BUCKET: ${{ vars.FUNCTION_SOURCE_BUCKET }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOYER_SA }}
+          token_format: access_token
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build & push dbt image
+        run: |
+          IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}/dbt"
+          gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+          docker build -t "${IMAGE}:${GITHUB_SHA}" .
+          docker push "${IMAGE}:${GITHUB_SHA}"
+
+      - name: Package & upload function source
+        run: |
+          OBJECT="ingestion-${GITHUB_SHA}.zip"
+          ( cd ingestion && zip -r "../${OBJECT}" . -x '*/__pycache__/*' '*.pyc' )
+          gcloud storage cp "${OBJECT}" "gs://${SOURCE_BUCKET}/${OBJECT}"
+          echo "FUNCTION_OBJECT=${OBJECT}" >> "$GITHUB_ENV"
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+
+      - name: Terraform init
+        working-directory: infra/terraform
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ vars.TFSTATE_BUCKET }}" \
+            -backend-config="prefix=terraform/state"
+
+      - name: Terraform plan
+        working-directory: infra/terraform
+        run: |
+          terraform plan -out=tfplan \
+            -var="project_id=${PROJECT_ID}" \
+            -var="image_tag=${GITHUB_SHA}" \
+            -var="dbt_image=${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}/dbt" \
+            -var="function_source_bucket=${SOURCE_BUCKET}" \
+            -var="function_source_object=${FUNCTION_OBJECT}"
+
+      - name: Terraform apply
+        if: github.ref == 'refs/heads/main'
+        working-directory: infra/terraform
+        run: terraform apply -auto-approve tfplan
