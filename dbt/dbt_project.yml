@@ -1,0 +1,20 @@
+name: "skycast"
+version: "1.0.0"
+config-version: 2
+profile: "skycast"
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  skycast:
+    stage:
+      +materialized: view
+      +schema: stage
+      +tags: ["weather"]
+    marts:
+      +materialized: table
+      +schema: marts
+      +tags: ["weather"]

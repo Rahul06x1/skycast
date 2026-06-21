@@ -1,0 +1,13 @@
+# dbt profile for SkyCast. Uses OAuth (Application Default Credentials) — no key files.
+# Project and dataset come from env vars so the same profile works in dev and CI.
+skycast:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('GCP_PROJECT') }}"
+      dataset: "{{ env_var('DBT_DATASET', 'skycast') }}"
+      location: "{{ env_var('BQ_LOCATION', 'EU') }}"
+      threads: 4
+      priority: interactive

@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: inbound
+    database: "{{ env_var('GCP_PROJECT') }}"
+    schema: inbound
+    description: "Raw forecast payloads landed by the ingestion Cloud Function."
+    tables:
+      - name: raw_forecasts
+        description: "One row per city per ingestion run; raw API JSON in `data`."
+        loaded_at_field: loaded_at
+        freshness:
+          warn_after: { count: 6, period: hour }
+          error_after: { count: 24, period: hour }
+        columns:
+          - name: loaded_at
+            tests: [not_null]
+          - name: city
+            tests: [not_null]
+          - name: data
+            tests: [not_null]

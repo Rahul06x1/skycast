@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: weather_typed
+    description: "One typed, deduplicated row per city per forecast hour."
+    columns:
+      - name: city
+        tests: [not_null]
+      - name: forecast_ts
+        tests: [not_null]
+      - name: temperature_c
+        tests: [not_null]
+      - name: precipitation_mm
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [city, forecast_ts]

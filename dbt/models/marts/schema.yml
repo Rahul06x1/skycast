@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: daily_weather
+    description: "Daily min/max/avg temperature and total precipitation per city."
+    columns:
+      - name: city
+        tests: [not_null]
+      - name: weather_date
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [city, weather_date]
+
+  - name: forecast_accuracy
+    description: "Drift between the first and latest forecast for each city/hour."
+    columns:
+      - name: abs_error_c
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
