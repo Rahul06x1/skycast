@@ -50,15 +50,11 @@ resource "google_cloud_run_v2_job_iam_member" "orchestrator_run" {
   member   = "serviceAccount:${google_service_account.orchestrator.email}"
 }
 
-resource "google_cloudfunctions2_function_iam_member" "orchestrator_invoke" {
-  cloud_function = google_cloudfunctions2_function.ingestion.name
-  location       = var.region
-  role           = "roles/cloudfunctions.invoker"
-  member         = "serviceAccount:${google_service_account.orchestrator.email}"
-}
-
-resource "google_cloud_run_service_iam_member" "orchestrator_invoke_run" {
-  service  = google_cloudfunctions2_function.ingestion.name
+# A gen2 Cloud Function is backed by a Cloud Run v2 service whose name matches the
+# function name. Invocation (incl. via the Workflow's OIDC call) requires run.invoker
+# on that backing service.
+resource "google_cloud_run_v2_service_iam_member" "orchestrator_invoke" {
+  name     = google_cloudfunctions2_function.ingestion.name
   location = var.region
   role     = "roles/run.invoker"
   member   = "serviceAccount:${google_service_account.orchestrator.email}"
