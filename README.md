@@ -127,6 +127,21 @@ dbt test --profiles-dir . --select tag:weather
 
 ---
 
+## Key decisions & what I learned
+
+- **ELT, not ETL.** Ingestion stores raw API JSON verbatim and dbt does all typing/shaping.
+  *Why:* schema changes never break ingestion and history can be reprocessed by re-running
+  dbt. *Lesson:* keep the loader dumb; put logic in the warehouse.
+- **Cloud Workflows to sequence ingest → dbt** rather than gluing functions with Pub/Sub.
+  *Tradeoff:* one more service, but built-in retries and a clear run history.
+- **Idempotent by design.** Re-runs append snapshots; `weather_typed` keeps the latest row
+  per `(city, forecast_ts)` via `ROW_NUMBER() … QUALIFY 1`. *Lesson:* design for
+  at-least-once delivery and deduplicate downstream instead of chasing exactly-once.
+- **Keyless everywhere.** GitHub OIDC → Workload Identity Federation for CI, OAuth/ADC for
+  dbt — no service-account keys in the repo. *Learned:* how to wire WIF end-to-end.
+- **`source()` + dbt tests over hardcoded table strings**, so lineage and source freshness
+  actually work (a deliberate fix to a pattern I saw drift in the reference codebase).
+
 ## Skills demonstrated
 
 GCP serverless data engineering (Cloud Functions, Cloud Run jobs, Workflows, Scheduler) ·
