@@ -4,6 +4,9 @@
 
 ### Serverless weather analytics on Google Cloud — a scheduled ELT pipeline
 
+[![CI](https://github.com/Rahul06x1/skycast/actions/workflows/ci.yaml/badge.svg)](https://github.com/Rahul06x1/skycast/actions/workflows/ci.yaml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 </div>
 
 SkyCast pulls hourly weather forecasts for a set of cities from the free
