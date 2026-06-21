@@ -47,6 +47,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install "dbt-bigquery==1.8.*"
+      - name: Install dbt packages
+        run: dbt deps
       - name: Compile (offline parse)
         run: dbt parse --profiles-dir . --target dev
         env:
