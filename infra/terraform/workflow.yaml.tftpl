@@ -1,0 +1,20 @@
+# Cloud Workflows definition: ingest weather, then run the dbt job.
+main:
+  steps:
+    - ingest:
+        call: http.post
+        args:
+          url: ${function_url}
+          auth:
+            type: OIDC
+        result: ingest_result
+    - run_dbt:
+        call: googleapis.run.v1.namespaces.jobs.run
+        args:
+          name: namespaces/${project_id}/jobs/${job_name}
+          location: ${region}
+        result: dbt_result
+    - done:
+        return:
+          ingested: $${ingest_result.body}
+          dbt: $${dbt_result}
